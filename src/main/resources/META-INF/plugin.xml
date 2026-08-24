@@ -1,0 +1,46 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <id>dev.gaphunter.gotimerleakcompanion</id>
+    <name>Go Timer Leak Companion</name>
+    <vendor>Gap Hunter Labs</vendor>
+    <description><![CDATA[
+        <p>Warning on a <code>case &lt;-time.After(...)</code> inside a
+        <code>select</code> block -- Go's documented behavior: the Timer
+        created by <code>time.After</code> is not recovered by the
+        garbage collector until it fires, and a <code>select</code>
+        inside any repeatedly-executed loop (the overwhelmingly common
+        place a <code>select</code> appears) creates a new one on every
+        iteration, leaking memory until each one's duration elapses.
+        <code>time.NewTimer(...)</code> plus a deferred/explicit
+        <code>.Stop()</code> is the documented, correct alternative.</p>
+        <p><b>100% static text analysis</b> -- a brace/keyword-based
+        line scanner, not a real Go PSI parser, so it works whether the
+        Go plugin is installed or not.</p>
+        <p>Confirmed real and undetected: GoLand 2025.3's new resource
+        leak inspection covers types implementing <code>io.Closer</code>
+        (files, network connections, <code>sql.Rows</code>, etc.) --
+        <code>time.After</code>'s returned channel does not implement
+        <code>io.Closer</code>, so it's structurally outside that
+        inspection's scope (confirmed by reading the feature's own
+        announcement post).</p>
+        <p>Stated honestly: v0.1 flags <code>time.After(</code> as a
+        <code>select</code> case regardless of whether the enclosing
+        <code>select</code> is itself inside a loop -- reliably
+        detecting "inside a loop" via text alone across nested braces
+        would be fragile. A <code>select</code> that only ever runs
+        once is a rare, low-cost false positive.</p>
+        <p>Free. No license nags, no telemetry, no network calls.</p>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <localInspection language=""
+            groupName="Go Timer Leak Companion"
+            displayName="time.After() inside a select case leaks its Timer"
+            enabledByDefault="true"
+            level="WARNING"
+            implementationClass="dev.gaphunter.gotimerleakcompanion.inspection.SelectTimeAfterLeakInspection"/>
+        <notificationGroup id="Go Timer Leak Companion" displayType="BALLOON"/>
+    </extensions>
+</idea-plugin>
