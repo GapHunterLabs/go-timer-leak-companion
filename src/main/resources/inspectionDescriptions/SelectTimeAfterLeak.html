@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports <code>case &lt;-time.After(...)</code> inside a Go <code>select</code> block.
+<!-- tooltip end -->
+<p>Before Go 1.23, the timer created by <code>time.After</code> was not released until it fired, so a
+<code>select</code> inside a loop kept a new timer alive on every iteration. Since Go 1.23 the garbage collector
+recovers unreferenced timers, so this mainly matters for modules that target an older Go version. A
+<code>time.NewTimer(...)</code> stopped explicitly works in every version.</p>
+</body>
+</html>
