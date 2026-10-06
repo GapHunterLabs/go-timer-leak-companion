@@ -5,14 +5,19 @@
     <vendor>Gap Hunter Labs</vendor>
     <description><![CDATA[
         <p>Warning on a <code>case &lt;-time.After(...)</code> inside a
-        <code>select</code> block -- Go's documented behavior: the Timer
-        created by <code>time.After</code> is not recovered by the
-        garbage collector until it fires, and a <code>select</code>
-        inside any repeatedly-executed loop (the overwhelmingly common
-        place a <code>select</code> appears) creates a new one on every
-        iteration, leaking memory until each one's duration elapses.
-        <code>time.NewTimer(...)</code> plus a deferred/explicit
-        <code>.Stop()</code> is the documented, correct alternative.</p>
+        <code>select</code> block in a module that targets Go before 1.23.
+        Until Go 1.23, the Timer created by <code>time.After</code> is not
+        recovered by the garbage collector until it fires, and a
+        <code>select</code> inside any repeatedly-executed loop (the
+        overwhelmingly common place a <code>select</code> appears) creates
+        a new one on every iteration, leaking memory until each one's
+        duration elapses. <code>time.NewTimer(...)</code> plus a
+        deferred/explicit <code>.Stop()</code> is the documented, correct
+        alternative.</p>
+        <p>Go 1.23 changed this: when the module's <code>go.mod</code>
+        declares <code>go 1.23</code> or later, unstopped timers are
+        garbage collected, and nothing is reported. A module without a
+        <code>go</code> line keeps the warning.</p>
         <p><b>100% static text analysis</b> -- a brace/keyword-based
         line scanner, not a real Go PSI parser, so it works whether the
         Go plugin is installed or not.</p>

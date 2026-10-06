@@ -1,10 +1,12 @@
 <html>
 <body>
-Reports <code>case &lt;-time.After(...)</code> inside a Go <code>select</code> block.
+Reports <code>case &lt;-time.After(...)</code> inside a Go <code>select</code> block, in a module that targets Go
+before 1.23.
 <!-- tooltip end -->
-<p>Before Go 1.23, the timer created by <code>time.After</code> was not released until it fired, so a
-<code>select</code> inside a loop kept a new timer alive on every iteration. Since Go 1.23 the garbage collector
-recovers unreferenced timers, so this mainly matters for modules that target an older Go version. A
-<code>time.NewTimer(...)</code> stopped explicitly works in every version.</p>
+<p>Until Go 1.23, the timer created by <code>time.After</code> is not released until it fires, so a
+<code>select</code> inside a loop keeps a new timer alive on every iteration. A <code>time.NewTimer(...)</code>
+stopped explicitly works in every version.</p>
+<p>When the nearest <code>go.mod</code> declares <code>go 1.23</code> or later, the garbage collector recovers
+unstopped timers and nothing is reported. A module without a <code>go</code> line keeps the warning.</p>
 </body>
 </html>

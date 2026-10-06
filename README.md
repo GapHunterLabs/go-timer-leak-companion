@@ -1,12 +1,17 @@
 # Go Timer Leak Companion
 
-Warning on a `case <-time.After(...)` inside a `select` block — Go's
-documented behavior: the Timer created by `time.After` is not
-recovered by the garbage collector until it fires, and a `select`
-inside any repeatedly-executed loop (the overwhelmingly common place a
-`select` appears) creates a new one on every iteration, leaking memory
-until each one's duration elapses. `time.NewTimer(...)` plus a
-deferred/explicit `.Stop()` is the documented, correct alternative.
+Warning on a `case <-time.After(...)` inside a `select` block in a
+module that targets Go before 1.23. Until Go 1.23, the Timer created by
+`time.After` is not recovered by the garbage collector until it fires,
+and a `select` inside any repeatedly-executed loop (the overwhelmingly
+common place a `select` appears) creates a new one on every iteration,
+leaking memory until each one's duration elapses. `time.NewTimer(...)`
+plus a deferred/explicit `.Stop()` is the documented, correct
+alternative.
+
+Go 1.23 changed this: when the module's `go.mod` declares `go 1.23` or
+later, unstopped timers are garbage collected, and the plugin does not
+report them. A module without a `go` line keeps the warning.
 
 ## Why it exists
 
@@ -15,6 +20,8 @@ loop compiles fine and reads naturally — it looks like the idiomatic
 way to add a timeout to a select. It quietly leaks a Timer on every
 iteration; in a hot loop this is measured in real, documented memory
 growth (~200 bytes per timer as of Go 1.15, adding up fast at scale).
+Modules that still declare an older `go` version in `go.mod` keep that
+behavior even when built with a newer toolchain.
 
 ## Why built this way
 

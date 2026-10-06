@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [0.1.2]
+
 ### Added
 
 - A description page for the inspection in **Settings | Editor |
@@ -16,6 +18,12 @@
   kept.
 - `PRIVACY.md` describes the values the plugin keeps in the IDE's local
   settings.
+
+### Fixed
+
+- `time.After` inside a `select` is no longer reported in modules whose `go.mod`
+  declares Go 1.23 or later: since Go 1.23 the garbage collector recovers
+  unstopped timers, so those warnings were false positives.
 
 ## [0.1.1]
 
@@ -33,6 +41,7 @@
 - 100% static text analysis, no Go plugin dependency, no network
   calls, no telemetry. Free.
 
-[Unreleased]: https://github.com/GapHunterLabs/go-timer-leak-companion/compare/0.1.1...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/go-timer-leak-companion/compare/0.1.2...HEAD
+[0.1.2]: https://github.com/GapHunterLabs/go-timer-leak-companion/compare/0.1.1...0.1.2
 [0.1.1]: https://github.com/GapHunterLabs/go-timer-leak-companion/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/GapHunterLabs/go-timer-leak-companion/commits/0.1.0
